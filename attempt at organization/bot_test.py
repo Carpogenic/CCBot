@@ -12,6 +12,7 @@ import typing
 import yt_dlp as yt_dlp
 from functools import partial
 import time
+import re
 
 
 intents = discord.Intents.default()
@@ -59,8 +60,11 @@ class Queue:
     def __init__(self):
         self._queue = []
 
-    def add(self, item):
-        self._queue.append(item)
+    def add(self, url, offset=0):
+        self._queue.append({
+            "url": url,
+            "offset": offset
+        })
 
     def get_next(self):
         return self._queue.pop(0) if self._queue else None
@@ -70,6 +74,12 @@ class Queue:
 
 
 song_queue = Queue()
+
+
+def get_timecode(url):
+    pattern = r"=(\d+)s$"
+    match = re.search(pattern, url)
+    return int(match.group(1)) if match else None
 
 async def fetch_and_play(ctx, url, offset=0):
     global start_time
@@ -82,6 +92,7 @@ async def fetch_and_play(ctx, url, offset=0):
         }],
     }
     try:
+        print(f"Only url:{url}")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             url2 = info['url']
@@ -98,14 +109,16 @@ async def fetch_and_play(ctx, url, offset=0):
             )
             last_played["url"] = url
     except Exception as e:
-        await ctx.send(f"An error occurred: {e}")
+        await ctx.send(f"!!An error occurred: {e}")
 
 async def play_next_song(ctx):
     print("play_next_song triggered")
-    next_url = song_queue.get_next()
-    if next_url:
-        print(next_url)
-        await fetch_and_play(ctx, next_url)
+    next_song = song_queue.get_next()
+    if next_song:
+        print(f"'from next_url'{next_song}")
+        next_url = next_song["url"]
+        next_offset = next_song["offset"]
+        await fetch_and_play(ctx, next_url, next_offset)
 
 async def after_play(error, ctx):
     print("after_play triggered")
@@ -119,7 +132,7 @@ accumulated_time = 0
 
 
 @bot.command()
-async def play(ctx, url=None):
+async def play(ctx, url=None, flag=None):
     global last_played, start_time, accumulated_time
 
     if not url:
@@ -191,6 +204,22 @@ help_text = """
 async def help_command(ctx):
     await ctx.send(help_text)
 
+
+""" file_path = "kaposis_sarkom.mp3"
+@bot.command()
+async def play_file(ctx):
+    # Check if the bot is connected to a voice channel
+    if bot.voice_clients:
+        voice_client = bot.voice_clients[0]  # Get the first voice client
+
+        # Play the local file if not already playing
+        if not voice_client.is_playing():
+            audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
+            voice_client.play(audio_source)
+        else:
+            await ctx.send("Already playing audio.")
+    else:
+        await ctx.send("Bot is not connected to any voice channel.") """
 
 
 
