@@ -132,7 +132,7 @@ accumulated_time = 0
 
 
 @bot.command()
-async def play(ctx, url=None, flag=None):
+async def play(ctx, url=None, providedOffset=0):
     global last_played, start_time, accumulated_time
 
     if not url:
@@ -144,7 +144,7 @@ async def play(ctx, url=None, flag=None):
             return
     else:
         # New song is being provided
-        offset = 0
+        offset = providedOffset
         accumulated_time = 0
 
     # Check if the bot is either currently playing music or if there are songs queued up.
