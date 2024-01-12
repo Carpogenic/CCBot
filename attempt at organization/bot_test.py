@@ -14,7 +14,6 @@ from functools import partial
 import time
 import re
 
-
 intents = discord.Intents.default()
 intents.reactions = True
 intents.messages = True
@@ -75,12 +74,6 @@ class Queue:
 
 song_queue = Queue()
 
-
-def get_timecode(url):
-    pattern = r"=(\d+)s$"
-    match = re.search(pattern, url)
-    return int(match.group(1)) if match else None
-
 async def fetch_and_play(ctx, url, offset=0):
     global start_time
     ydl_opts = {
@@ -126,13 +119,57 @@ async def after_play(error, ctx):
         print(f'Play error: {error}')
     await play_next_song(ctx)
 
+# Define a simple View that gives us a confirmation menu
+class Confirm(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.value = None
+
+    # When the confirm button is pressed, set the inner value to `True` and
+    # stop the View from listening to more input.
+    # We also send the user an ephemeral message that we're confirming their choice.
+    @discord.ui.button(label='Yes', style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Confirming', ephemeral=True)
+        self.value = True
+        self.stop()
+
+    # This one is similar to the confirmation button except sets the inner value to `False`
+    @discord.ui.button(label='No', style=discord.ButtonStyle.grey)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Starting at 0', ephemeral=True)
+        self.value = False
+        self.stop()
+
+
+async def timecode_confirm_prompt(ctx: commands.Context):
+    """Asks the user a question to confirm something."""
+    # We create the view and assign it to a variable so we can wait for it later.
+    view = Confirm()
+    await ctx.send('Do you want to use the time in the URL as the start time?', view=view)
+    # Wait for the View to stop listening for input...
+    await view.wait()
+    if view.value is None:
+        print('Timed out...')
+    elif view.value:
+        print('Confirmed...')
+    else:
+        print('Cancelled...')
+    return view.value
+
+async def get_timecode(ctx, url):
+    pattern = r"\?t=(\d+)$"
+    match = re.search(pattern, url)
+    return int(match.group(1)) if match and await timecode_confirm_prompt(ctx) else 0
+
+
 last_played = {"url": None, "offset": 0}
 start_time = None
 accumulated_time = 0
 
 
 @bot.command()
-async def play(ctx, url=None, providedOffset=0):
+async def play(ctx, url=None, providedOffset=None):
     global last_played, start_time, accumulated_time
 
     if not url:
@@ -144,7 +181,10 @@ async def play(ctx, url=None, providedOffset=0):
             return
     else:
         # New song is being provided
-        offset = providedOffset
+        if providedOffset:
+            offset = providedOffset
+        else:
+            offset = await get_timecode(ctx, url)
         accumulated_time = 0
 
     # Check if the bot is either currently playing music or if there are songs queued up.

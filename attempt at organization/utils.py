@@ -1,4 +1,5 @@
 import json
+import discord
 from config import scores_file
 
 def save_scores(scores):
