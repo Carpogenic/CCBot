@@ -245,7 +245,7 @@ async def help_command(ctx):
     await ctx.send(help_text)
 
 
-""" file_path = "kaposis_sarkom.mp3"
+""" file_path = "path/to/file"
 @bot.command()
 async def play_file(ctx):
     # Check if the bot is connected to a voice channel
