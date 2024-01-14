@@ -1,5 +1,3 @@
-# todo: add cases for if reactions are removed
-
 import os
 import json
 import discord
@@ -71,11 +69,12 @@ class Queue:
     def is_empty(self):
         return not bool(self._queue)
 
-
 song_queue = Queue()
 
+is_manual_stop = False
+
 async def fetch_and_play(ctx, url, offset=0):
-    global start_time
+    global start_time, is_manual_stop
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -85,7 +84,6 @@ async def fetch_and_play(ctx, url, offset=0):
         }],
     }
     try:
-        print(f"Only url:{url}")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             url2 = info['url']
@@ -98,9 +96,10 @@ async def fetch_and_play(ctx, url, offset=0):
                     source=url2,
                     before_options=f'-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -ss {offset}'
                 ),
-                after=lambda e: bot.loop.create_task(after_play(e, ctx))
+                after=lambda e: bot.loop.create_task(after_play(e, ctx)) if not is_manual_stop and ctx.voice_client else print("this is inside the after var")
             )
-            last_played["url"] = url
+            last_played['url'] = url
+            last_played['offset'] = int(offset)
     except Exception as e:
         await ctx.send(f"!!An error occurred: {e}")
 
@@ -118,6 +117,8 @@ async def after_play(error, ctx):
     if error:
         print(f'Play error: {error}')
     await play_next_song(ctx)
+   
+        
 
 # Define a simple View that gives us a confirmation menu
 class Confirm(discord.ui.View):
@@ -150,11 +151,11 @@ async def timecode_confirm_prompt(ctx: commands.Context):
     # Wait for the View to stop listening for input...
     await view.wait()
     if view.value is None:
-        print('Timed out...')
+        print('Timecode prompt timed out...')
     elif view.value:
-        print('Confirmed...')
+        print('Timecode prompt confirmed...')
     else:
-        print('Cancelled...')
+        print('Timecode prompt denied...')
     return view.value
 
 async def get_timecode(ctx, url):
@@ -170,15 +171,17 @@ accumulated_time = 0
 
 @bot.command()
 async def play(ctx, url=None, providedOffset=None):
-    global last_played, start_time, accumulated_time
+    global last_played, start_time, accumulated_time, is_manual_stop
+
+    is_manual_stop = False
 
     if not url:
         if last_played and last_played['url'] and not ctx.voice_client.is_playing():
-            url = last_played['url']
             offset = last_played['offset'] + accumulated_time
+            await fetch_and_play(ctx, last_played['url'], offset)
         else:
             await ctx.send("No URL found to resume or queue, please provide a link.")
-            return
+        return
     else:
         # New song is being provided
         if providedOffset:
@@ -189,7 +192,7 @@ async def play(ctx, url=None, providedOffset=None):
 
     # Check if the bot is either currently playing music or if there are songs queued up.
     if (ctx.voice_client and (ctx.voice_client.is_playing() or not song_queue.is_empty()) and url):
-        song_queue.add(url)
+        song_queue.add(url, offset)
         await ctx.send(f"Song queued. Position: {len(song_queue._queue)}")
         print(song_queue._queue)
         return
@@ -202,9 +205,10 @@ async def play(ctx, url=None, providedOffset=None):
 
 @bot.command()
 async def stop(ctx):
-    global start_time, accumulated_time, last_played
+    global start_time, accumulated_time, last_played, is_manual_stop
 
     if ctx.voice_client and ctx.voice_client.is_playing():
+        is_manual_stop = True
         # Calculate elapsed time from the last start_time and add to accumulated_time
         elapsed_time = time.time() - start_time
         accumulated_time += elapsed_time
