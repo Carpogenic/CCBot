@@ -123,7 +123,7 @@ async def after_play(error, ctx):
 # Define a simple View that gives us a confirmation menu
 class Confirm(discord.ui.View):
     def __init__(self):
-        super().__init__()
+        super().__init__(timeout=15)
         self.value = None
 
     # When the confirm button is pressed, set the inner value to `True` and
@@ -132,6 +132,7 @@ class Confirm(discord.ui.View):
     @discord.ui.button(label='Yes', style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Confirming', ephemeral=True)
+        await interaction.message.delete()
         self.value = True
         self.stop()
 
@@ -139,6 +140,7 @@ class Confirm(discord.ui.View):
     @discord.ui.button(label='No', style=discord.ButtonStyle.grey)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Starting at 0', ephemeral=True)
+        await interaction.message.delete()
         self.value = False
         self.stop()
 
@@ -147,11 +149,12 @@ async def timecode_confirm_prompt(ctx: commands.Context):
     """Asks the user a question to confirm something."""
     # We create the view and assign it to a variable so we can wait for it later.
     view = Confirm()
-    await ctx.send('Do you want to use the time in the URL as the start time?', view=view)
+    await ctx.send('Do you want to use the time in the URL as the start time?', view=view, delete_after=15)
     # Wait for the View to stop listening for input...
     await view.wait()
     if view.value is None:
         print('Timecode prompt timed out...')
+        await ctx.send("Timed out: Starting song from the beginning")
     elif view.value:
         print('Timecode prompt confirmed...')
     else:
