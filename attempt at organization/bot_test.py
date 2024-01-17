@@ -21,7 +21,9 @@ intents.guild_messages = True
 intents.guilds = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='.', intents=intents)
+activity = discord.Activity(name='you', type=discord.ActivityType.watching)
+
+bot = commands.Bot(command_prefix='.', intents=intents, activity=activity)
 guild = discord.utils.get(bot.guilds, name=GUILD)
 
 if os.path.exists(scores_file) and os.path.getsize(scores_file) > 0:
@@ -188,18 +190,24 @@ async def play(ctx, url=None, providedOffset=None):
     else:
         # New song is being provided
         if providedOffset:
-            offset = providedOffset
+            try:
+                offset = int(providedOffset)
+            except Exception as e:
+                #i'll fix this some day
+                user = None
+
+                await ctx.message.add_reaction(bot.get_emoji(1083983552540053596))
+                await ctx.send(f"Pretty sure '{providedOffset}' isn't a number, bro. -1 credit")
+                return
         else:
             offset = await get_timecode(ctx, url)
         accumulated_time = 0
-
     # Check if the bot is either currently playing music or if there are songs queued up.
     if (ctx.voice_client and (ctx.voice_client.is_playing() or not song_queue.is_empty()) and url):
         song_queue.add(url, offset)
         await ctx.send(f"Song queued. Position: {len(song_queue._queue)}")
         print(song_queue._queue)
         return
-
     
     await fetch_and_play(ctx, url, offset)
 
