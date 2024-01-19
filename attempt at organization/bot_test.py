@@ -1,3 +1,5 @@
+# add queue list command to see what songs are queued
+
 import os
 import json
 import discord
@@ -53,20 +55,28 @@ async def join(ctx):
 
 @bot.command()
 async def leave(ctx):
+    global song_queue, last_played
+    song_queue._queue = []
+    last_played = None
     await ctx.voice_client.disconnect()
 
 class Queue:
     def __init__(self):
         self._queue = []
+        self.current_song = None
 
-    def add(self, url, offset=0):
+    def add(self, url, offset=0, song_title=None):
         self._queue.append({
             "url": url,
-            "offset": offset
+            "offset": offset,
+            "title": song_title
         })
 
     def get_next(self):
-        return self._queue.pop(0) if self._queue else None
+        if self._queue:
+            self.current_song = self._queue.pop(0)
+            return self.current_song
+        return None
 
     def is_empty(self):
         return not bool(self._queue)
@@ -76,7 +86,7 @@ song_queue = Queue()
 is_manual_stop = False
 
 async def fetch_and_play(ctx, url, offset=0):
-    global start_time, is_manual_stop
+    global start_time, is_manual_stop, currently_playing
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -98,7 +108,7 @@ async def fetch_and_play(ctx, url, offset=0):
                     source=url2,
                     before_options=f'-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -ss {offset}'
                 ),
-                after=lambda e: bot.loop.create_task(after_play(e, ctx)) if not is_manual_stop and ctx.voice_client else print("this is inside the after var")
+                after=lambda e: bot.loop.create_task(after_play(e, ctx)) if not is_manual_stop and ctx.voice_client else None
             )
             last_played['url'] = url
             last_played['offset'] = int(offset)
@@ -168,6 +178,14 @@ async def get_timecode(ctx, url):
     match = re.search(pattern, url)
     return int(match.group(1)) if match and await timecode_confirm_prompt(ctx) else 0
 
+def get_song_title(url: str) -> str:
+    try:
+        with yt_dlp.YoutubeDL({'quiet': True, 'skip_download': True}) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+        return info_dict.get('title', 'Title not found')
+    except Exception as e:
+        return f"An error occurred: {e}"
+
 
 last_played = {"url": None, "offset": 0}
 start_time = None
@@ -193,8 +211,6 @@ async def play(ctx, url=None, providedOffset=None):
             try:
                 offset = int(providedOffset)
             except Exception as e:
-                #i'll fix this some day
-                user = None
 
                 await ctx.message.add_reaction(bot.get_emoji(1083983552540053596))
                 await ctx.send(f"Pretty sure '{providedOffset}' isn't a number, bro. -1 credit")
@@ -204,7 +220,8 @@ async def play(ctx, url=None, providedOffset=None):
         accumulated_time = 0
     # Check if the bot is either currently playing music or if there are songs queued up.
     if (ctx.voice_client and (ctx.voice_client.is_playing() or not song_queue.is_empty()) and url):
-        song_queue.add(url, offset)
+        song_title = get_song_title(url)
+        song_queue.add(url, offset, song_title)
         await ctx.send(f"Song queued. Position: {len(song_queue._queue)}")
         print(song_queue._queue)
         return
@@ -245,6 +262,31 @@ async def skip(ctx):
         await ctx.send("Skipped to the next song.")
     except Exception as e:
         await ctx.send(f"Error in skip: {e}")
+
+
+@bot.command(aliases=['q', 'queue'])
+async def display_queue(ctx):
+    message_parts = []
+
+    # Include the currently playing song if there is one
+    if song_queue.current_song:
+        message_parts.append(f"Currently playing: {song_queue.current_song['title']}")
+
+    # Add the upcoming songs in the queue
+    if not song_queue.is_empty():
+        title_list = '\n'.join(f'{idx + 1}. {song["title"]}' for idx, song in enumerate(song_queue._queue))
+        message_parts.append(f"Upcoming:\n{title_list}")
+    elif not message_parts:
+        message_parts.append("The song queue is currently empty.")
+
+    message = '\n\n'.join(message_parts)
+    await ctx.send(message)
+
+    
+
+
+
+
 
 help_text = """
 **Bot Commands:**
