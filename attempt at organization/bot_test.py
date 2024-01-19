@@ -65,6 +65,9 @@ class Queue:
         self._queue = []
         self.current_song = None
 
+    def set_current(self, song):
+        self.current_song = song
+
     def add(self, url, offset=0, song_title=None):
         self._queue.append({
             "url": url,
@@ -74,8 +77,9 @@ class Queue:
 
     def get_next(self):
         if self._queue:
-            self.current_song = self._queue.pop(0)
-            return self.current_song
+            next_song = self._queue.pop(0)
+            self.current_song = next_song['title']
+            return next_song
         return None
 
     def is_empty(self):
@@ -86,7 +90,7 @@ song_queue = Queue()
 is_manual_stop = False
 
 async def fetch_and_play(ctx, url, offset=0):
-    global start_time, is_manual_stop, currently_playing
+    global start_time, is_manual_stop
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -178,7 +182,7 @@ async def get_timecode(ctx, url):
     match = re.search(pattern, url)
     return int(match.group(1)) if match and await timecode_confirm_prompt(ctx) else 0
 
-def get_song_title(url: str) -> str:
+async def get_song_title(url: str) -> str:
     try:
         with yt_dlp.YoutubeDL({'quiet': True, 'skip_download': True}) as ydl:
             info_dict = ydl.extract_info(url, download=False)
@@ -220,12 +224,12 @@ async def play(ctx, url=None, providedOffset=None):
         accumulated_time = 0
     # Check if the bot is either currently playing music or if there are songs queued up.
     if (ctx.voice_client and (ctx.voice_client.is_playing() or not song_queue.is_empty()) and url):
-        song_title = get_song_title(url)
+        song_title = await get_song_title(url)
         song_queue.add(url, offset, song_title)
         await ctx.send(f"Song queued. Position: {len(song_queue._queue)}")
         print(song_queue._queue)
         return
-    
+    song_queue.set_current(await get_song_title(url))
     await fetch_and_play(ctx, url, offset)
 
     
@@ -258,7 +262,6 @@ async def stop(ctx):
 async def skip(ctx):
     try:
         ctx.voice_client.stop()
-        await play_next_song(ctx)
         await ctx.send("Skipped to the next song.")
     except Exception as e:
         await ctx.send(f"Error in skip: {e}")
@@ -270,12 +273,12 @@ async def display_queue(ctx):
 
     # Include the currently playing song if there is one
     if song_queue.current_song:
-        message_parts.append(f"Currently playing: {song_queue.current_song['title']}")
+        message_parts.append(f"**Currently playing:** {song_queue.current_song}")
 
     # Add the upcoming songs in the queue
     if not song_queue.is_empty():
         title_list = '\n'.join(f'{idx + 1}. {song["title"]}' for idx, song in enumerate(song_queue._queue))
-        message_parts.append(f"Upcoming:\n{title_list}")
+        message_parts.append(f"**Upcoming:**\n{title_list}")
     elif not message_parts:
         message_parts.append("The song queue is currently empty.")
 
@@ -295,6 +298,7 @@ help_text = """
 `.play <URL>` - Plays the song from the provided URL or resumes the last played song if no URL is given.
 `.stop` - Stops the currently playing song.
 `.skip` - Skips to the next song in the queue.
+`.queue, .q` - Displays the queue.
 """
 
 @bot.command(name='halp')
