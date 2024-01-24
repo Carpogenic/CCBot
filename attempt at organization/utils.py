@@ -16,3 +16,14 @@ async def update_scores(ctx, scores, original_author, user, delta):
         scores[guild_id][original_author_id] = 0
     scores[guild_id][original_author_id] += delta
     save_scores(scores)
+
+async def elsie_ellipsis(ELSIE, guild_id, scores, delta):
+    original_author_id = str(ELSIE)
+    guild_id = str(guild_id)
+    if guild_id not in scores:
+        scores[guild_id] = {}
+    if original_author_id not in scores[guild_id]:
+        scores[guild_id][original_author_id] = 0
+    scores[guild_id][original_author_id] += delta
+    save_scores(scores)
+    

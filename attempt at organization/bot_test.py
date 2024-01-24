@@ -17,6 +17,7 @@ import asyncio
 import random
 
 
+
 intents = discord.Intents.default()
 intents.reactions = True
 intents.messages = True
@@ -50,10 +51,12 @@ async def on_reaction_add(reaction, user):
 @bot.event
 async def on_message(message):
     if message.author.id == int(ELSIE) and re.search(r"^\.{3}$", message.content):
+        await utils.elsie_ellipsis(ELSIE, message.guild.id, scores, 1)
         await asyncio.sleep(random.randint(1, 10))
         await message.channel.send("...")
+    await bot.process_commands(message)
 
-@bot.command()
+@bot.command(aliases=["scores"])
 async def score(ctx, user: typing.Optional[discord.User] = None):
     await score_handler(ctx, bot, scores, user)
 
