@@ -4,7 +4,7 @@ import os
 import json
 import discord
 from discord.ext import commands
-from config import token, GUILD, scores_file
+from config import token, GUILD, scores_file, ELSIE
 import utils
 import events
 from commands.score import score_handler
@@ -13,6 +13,9 @@ import yt_dlp as yt_dlp
 from functools import partial
 import time
 import re
+import asyncio
+import random
+
 
 intents = discord.Intents.default()
 intents.reactions = True
@@ -43,6 +46,12 @@ async def on_ready():
 @bot.event
 async def on_reaction_add(reaction, user):
     await events.reaction_add_handler(bot, reaction, user, scores)
+
+@bot.event
+async def on_message(message):
+    if message.author.id == ELSIE and re.search(r"^\.{3}$", message.content):
+        await asyncio.sleep(random.randint(1, 10))
+        await message.channel.send("...")
 
 @bot.command()
 async def score(ctx, user: typing.Optional[discord.User] = None):
