@@ -49,7 +49,7 @@ async def on_reaction_add(reaction, user):
 
 @bot.event
 async def on_message(message):
-    if message.author.id == ELSIE and re.search(r"^\.{3}$", message.content):
+    if message.author.id == int(ELSIE) and re.search(r"^\.{3}$", message.content):
         await asyncio.sleep(random.randint(1, 10))
         await message.channel.send("...")
 
