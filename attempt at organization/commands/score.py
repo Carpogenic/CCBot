@@ -1,14 +1,15 @@
 import discord
 import random
 import typing 
+import utils
 
 # shows all scores or score of a user if specified
-async def score_handler(ctx, bot, scores, user: typing.Optional[discord.User] = None):
+async def score_handler(ctx, bot, user: typing.Optional[discord.User] = None):
     guild = ctx.message.guild
     guild_id = str(ctx.guild.id)
     if user is None:
         # Show the entire scoreboard
-        sorted_scores = sorted(scores[guild_id].items(), key=lambda x: x[1], reverse=True)
+        sorted_scores = sorted(utils.scores[guild_id].items(), key=lambda x: x[1], reverse=True)
         scoreboard = []
         for user_id, score in sorted_scores:
             member = guild.get_member(int(user_id))
@@ -23,7 +24,7 @@ async def score_handler(ctx, bot, scores, user: typing.Optional[discord.User] = 
 
     else:
         user_id = str(user.id)
-        score = scores[guild_id].get(user_id, 0)
+        score = utils.scores[guild_id].get(user_id, 0)
         if score > 0:
             messages = [f'{user.display_name} has {score} credits.',
                         f'{user.display_name} is still okay with {score} credits.',
