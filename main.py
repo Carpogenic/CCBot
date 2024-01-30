@@ -1,20 +1,11 @@
-# add queue list command to see what songs are queued
+# add descriptions to commands and remove the jank .halp command
 
 import os
-import json
 import discord
 from discord.ext import commands
-from config import token, GUILD, ELSIE
+from config import TOKEN, TEST_GUILD
 import utils
-import events
-from commands.score import score_handler
-import typing
-import yt_dlp as yt_dlp
-from functools import partial
-import time
-import re
-import asyncio
-import random
+from discord import app_commands
 
 
 
@@ -39,25 +30,42 @@ class MyBot(commands.Bot):
                     relative_path = os.path.relpath(root, './cogs')
                     dot_path = relative_path.replace(os.sep, '.')
                     extension_name = f'cogs.{dot_path}.{filename[:-3]}' if dot_path != '.' else f'cogs.{filename[:-3]}'
+                    print(f"\n{extension_name}")
                     
                     try:
                         await self.load_extension(extension_name)
                         print(f"Loaded cog: {filename[:-7]}")
                     except Exception as e:
                         print(f"Failed to load cog {filename[:-7]}: {e}")
+
+        #self.tree.copy_global_to(guild=discord.Object(id=TEST_GUILD))
+        #await bot.tree.sync(guild=discord.Object(id=TEST_GUILD))
+        await bot.tree.sync()
         return await super().setup_hook()
 
 
 
 activity = discord.Activity(name='you', type=discord.ActivityType.watching)
 bot = MyBot(command_prefix='.', intents=intents, activity=activity)
-guild = discord.utils.get(bot.guilds, name=GUILD)
 
 
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+
+@bot.tree.command(name="echo", description="Echoes a message.")
+@app_commands.describe(message="The message to echo.")
+async def echo (interaction: discord.Interaction, message: str) -> None:
+    await interaction.response.send_message(message)
+    await interaction.followup.send("This is a followup message.")
+    await interaction.followup.send("This is another followup message.")
+
+@bot.command(hidden=True)
+@commands.is_owner()
+async def reload(ctx, extension:str):
+    await bot.reload_extension(f"{extension}")
+    await ctx.send(f"Reloaded: {extension}")
 
 
 
@@ -94,4 +102,4 @@ async def play_file(ctx):
 
 
 
-bot.run(token)
+bot.run(TOKEN)
