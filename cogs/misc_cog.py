@@ -13,7 +13,7 @@ class miscCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.id == int(ELSIE) and message.content == "..." and random.randint(1, 10) >= 5:
+        if message.author.id == int(ELSIE) and message.content == "...":
             await utils.elsie_ellipsis_score(ELSIE, message.guild.id, 1)
             await asyncio.sleep(random.randint(1, 10))
             await message.channel.send("...")

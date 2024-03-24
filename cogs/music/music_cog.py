@@ -26,6 +26,9 @@ class musicCog(commands.Cog):
     async def play(self, ctx, url=None, providedOffset=None):
 
         self.player.is_manual_stop = False
+        
+        if not ctx.voice_client:
+            await self.join(ctx)
 
         if not url:
             if self.player.last_played and self.player.last_played['url'] and not ctx.voice_client.is_playing():

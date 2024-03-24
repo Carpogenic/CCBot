@@ -14,7 +14,7 @@ class pollModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         options = [self.children[i].value for i in range(len(self.children)) if self.children[i].value.strip()]
         
-        view = pollView(self.author, options, timeout=900)
+        view = pollView(self.author, options, timeout=899) # longest timeout before the webhook token expires
         embed = discord.Embed(title="Poll Results", description="Current votes:")
         for option in options:
             embed.add_field(name=option, value="Votes: 0", inline=False)

@@ -58,16 +58,15 @@ async def on_ready():
 @app_commands.describe(message="The message to echo.")
 async def echo (interaction: discord.Interaction, message: str) -> None:
     await interaction.response.send_message(message)
-    await interaction.followup.send("This is a followup message.")
-    await interaction.followup.send("This is another followup message.")
+    """ await interaction.followup.send("This is a followup message.")
+    await interaction.followup.send("This is another followup message.") """
 
 @bot.command(hidden=True)
 @commands.is_owner()
 async def reload(ctx, extension:str):
     await bot.reload_extension(f"{extension}")
     await ctx.send(f"Reloaded: {extension}")
-
-
+    
 
 help_text = """
 **Bot Commands:**
@@ -84,7 +83,7 @@ async def help_command(ctx):
     await ctx.send(help_text)
 
 
-""" file_path = "path/to/file"
+file_path = "./lyrebird mix.mp3"
 @bot.command()
 async def play_file(ctx):
     # Check if the bot is connected to a voice channel
@@ -98,7 +97,7 @@ async def play_file(ctx):
         else:
             await ctx.send("Already playing audio.")
     else:
-        await ctx.send("Bot is not connected to any voice channel.") """
+        await ctx.send("Bot is not connected to any voice channel.")
 
 
 
