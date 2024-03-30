@@ -38,8 +38,8 @@ class MyBot(commands.Bot):
                     except Exception as e:
                         print(f"Failed to load cog {filename[:-7]}: {e}")
 
-        #self.tree.copy_global_to(guild=discord.Object(id=TEST_GUILD))
-        #await bot.tree.sync(guild=discord.Object(id=TEST_GUILD))
+        self.tree.copy_global_to(guild=discord.Object(id=TEST_GUILD))
+        await bot.tree.sync(guild=discord.Object(id=TEST_GUILD))
         await bot.tree.sync()
         return await super().setup_hook()
 
@@ -83,7 +83,7 @@ async def help_command(ctx):
     await ctx.send(help_text)
 
 
-file_path = "./lyrebird mix.mp3"
+""" file_path = "./lyrebird mix.mp3"
 @bot.command()
 async def play_file(ctx):
     # Check if the bot is connected to a voice channel
@@ -97,7 +97,7 @@ async def play_file(ctx):
         else:
             await ctx.send("Already playing audio.")
     else:
-        await ctx.send("Bot is not connected to any voice channel.")
+        await ctx.send("Bot is not connected to any voice channel.") """
 
 
 

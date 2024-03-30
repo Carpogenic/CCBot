@@ -3,6 +3,7 @@ from discord.ext import commands
 import yt_dlp as yt_dlp
 import time
 import re
+import os
 from .music_utils import Queue, Confirm
 
 
@@ -95,3 +96,14 @@ class MusicPlayer:
         else:
             print('Timecode prompt denied...')
         return view.value
+    
+
+
+    # for playing local sounds
+    async def play_local_sound(self, interaction: discord.Interaction, file_path: str):
+        # Play the local file if not already playing
+            if not interaction.guild.voice_client.is_playing():
+                audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
+                interaction.guild.voice_client.play(audio_source)
+            else:
+                await interaction.response.send_message("Already playing audio.", ephemeral=True, delete_after=20)

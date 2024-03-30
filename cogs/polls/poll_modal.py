@@ -1,6 +1,5 @@
 import discord
 from .poll_view import pollView
-import traceback
 
 
 class pollModal(discord.ui.Modal):
@@ -27,7 +26,6 @@ class pollModal(discord.ui.Modal):
         
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
-        traceback.print_exc()
         print(f"Error with pollModal{Exception}")
         await interaction.response.send_message("something went wrong", ephemeral=True)
 

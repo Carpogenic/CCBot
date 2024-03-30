@@ -1,5 +1,7 @@
+import discord
 from discord.ext import commands
 from .music_player import MusicPlayer
+from .music_utils import LocalSoundsView
 import time
 
 
@@ -104,6 +106,16 @@ class musicCog(commands.Cog):
 
         message = '\n\n'.join(message_parts)
         await ctx.send(message)
+
+    @commands.hybrid_command(name="play_file", description="Play a local sound file")
+    async def play_local(self, ctx):
+        directory = "./sounds"
+
+        if not ctx.voice_client:
+            await self.join(ctx)
+
+        await ctx.send("Select a sound:", view=LocalSoundsView(directory, self.player))
+    
 
 
 
