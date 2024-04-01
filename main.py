@@ -73,32 +73,16 @@ help_text = """
 `.join` - Makes the bot join the voice chat that you are in
 `.leave.` - Makes the bot disconnect from voice chat
 `.play <URL>` - Plays the song from the provided URL or resumes the last played song if no URL is given.
+`.play_file` or `/play_file` - Plays a local sound file, doesn't respect the queue.
 `.stop` - Stops the currently playing song.
 `.skip` - Skips to the next song in the queue.
 `.queue, .q` - Displays the queue.
+`/poll` - Create a poll that people can vote in.
 """
 
 @bot.command(name='halp')
 async def help_command(ctx):
     await ctx.send(help_text)
-
-
-""" file_path = "./lyrebird mix.mp3"
-@bot.command()
-async def play_file(ctx):
-    # Check if the bot is connected to a voice channel
-    if bot.voice_clients:
-        voice_client = bot.voice_clients[0]  # Get the first voice client
-
-        # Play the local file if not already playing
-        if not voice_client.is_playing():
-            audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
-            voice_client.play(audio_source)
-        else:
-            await ctx.send("Already playing audio.")
-    else:
-        await ctx.send("Bot is not connected to any voice channel.") """
-
 
 
 bot.run(TOKEN)
