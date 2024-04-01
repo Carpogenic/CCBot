@@ -1,3 +1,5 @@
+#todo: move stop logic to MusicPlayer so play_local_sound doesn't disregard elapsed_time
+
 import discord
 from discord.ext import commands
 from .music_player import MusicPlayer
@@ -65,19 +67,22 @@ class musicCog(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         if ctx.voice_client and ctx.voice_client.is_playing():
-            self.player.is_manual_stop = True
-            # Calculate elapsed time from the last start_time and add to accumulated_time
-            elapsed_time = time.time() - self.player.start_time
-            self.player.accumulated_time += elapsed_time
+            try:
+                self.player.is_manual_stop = True
+                # Calculate elapsed time from the last start_time and add to accumulated_time
+                elapsed_time = time.time() - self.player.start_time
+                self.player.accumulated_time += elapsed_time
 
-            # Update the offset with accumulated_time
-            self.player.last_played["offset"] += self.player.accumulated_time
+                # Update the offset with accumulated_time
+                self.player.last_played["offset"] += self.player.accumulated_time
 
-            # Reset accumulated_time for next play
-            self.player.accumulated_time = 0
-            
-            ctx.voice_client.stop()
-            await ctx.send("Stopped the audio playback.")
+                # Reset accumulated_time for next play
+                self.player.accumulated_time = 0
+            except:
+                pass
+            finally:
+                ctx.voice_client.stop()
+                await ctx.send("Stopped the audio playback.")
         else:
             await ctx.send("I'm not currently playing anything.")
 
@@ -114,7 +119,7 @@ class musicCog(commands.Cog):
         if not ctx.voice_client:
             await self.join(ctx)
 
-        await ctx.send("Select a sound:", view=LocalSoundsView(directory, self.player))
+        await ctx.send("Select a sound:", view=LocalSoundsView(directory, self.player), delete_after=850)
     
 
 

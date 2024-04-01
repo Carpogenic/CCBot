@@ -102,8 +102,11 @@ class MusicPlayer:
     # for playing local sounds
     async def play_local_sound(self, interaction: discord.Interaction, file_path: str):
         # Play the local file if not already playing
-            if not interaction.guild.voice_client.is_playing():
+            if interaction.guild.voice_client.is_playing():
+                interaction.guild.voice_client.stop()
+            try:
                 audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
                 interaction.guild.voice_client.play(audio_source)
-            else:
-                await interaction.response.send_message("Already playing audio.", ephemeral=True, delete_after=20)
+            except Exception as e:
+                print(f"Play Local Sound error: {e}")
+                
