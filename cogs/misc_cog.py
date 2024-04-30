@@ -18,10 +18,10 @@ class miscCog(commands.Cog):
             await asyncio.sleep(random.randint(1, 10))
             await message.channel.send("...")
 
-    @commands.command(name="4door", description="because u 4got agen", aliases=['d', 'door', 'code', 'c', 'doorcode'], hidden=True)
-    async def door(self, ctx):
-        if ctx.guild.id == THEGAME_GUILD:
-            ctx.send(DOOR)
+    @commands.command(aliases=['d', 'door', 'code', 'c', 'doorcode'], hidden=True)
+    async def doorcode_reminder(self, ctx):
+        if ctx.guild.id == int(THEGAME_GUILD):
+            await ctx.send(DOOR)
         else:
             return
         
