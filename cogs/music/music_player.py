@@ -5,6 +5,7 @@ import time
 import re
 import os
 from .music_utils import Queue, Confirm
+import traceback
 
 
 
@@ -48,6 +49,7 @@ class MusicPlayer:
                 self.last_played['url'] = url
                 self.last_played['offset'] = int(offset)
         except Exception as e:
+            print(traceback.format_exc())
             await ctx.send(f"!!An error occurred: {e}")
 
     async def play_next_song(self, ctx):
