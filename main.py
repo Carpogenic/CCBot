@@ -1,4 +1,5 @@
 # add descriptions to commands and remove the jank .halp command
+# remove traceback from music_player as soon as i figure out what the random error is
 
 import os
 import discord
