@@ -39,9 +39,8 @@ class MyBot(commands.Bot):
                     except Exception as e:
                         print(f"Failed to load cog {filename[:-7]}: {e}")
 
-        self.tree.copy_global_to(guild=discord.Object(id=TEST_GUILD))
-        await bot.tree.sync(guild=discord.Object(id=TEST_GUILD))
-        await bot.tree.sync()
+        
+        
         return await super().setup_hook()
 
 
@@ -62,12 +61,54 @@ async def echo (interaction: discord.Interaction, message: str) -> None:
     """ await interaction.followup.send("This is a followup message.")
     await interaction.followup.send("This is another followup message.") """
 
+# Reloads a specified cog. If no extension is provided, it reloads the last used cog.
+currentWorkingCog = None
 @bot.command(hidden=True)
 @commands.is_owner()
-async def reload(ctx, extension:str):
-    await bot.reload_extension(f"{extension}")
-    await ctx.send(f"Reloaded: {extension}")
+async def reload(ctx, extension: str = None):
+    global currentWorkingCog
     
+    extension = extension or currentWorkingCog
+    currentWorkingCog = extension
+    
+    if extension is None:
+        await ctx.send("No extension specified and no previous extension to reload.")
+        return
+    # try reloading the cog
+    try:
+        await bot.reload_extension(f"{extension}")
+        await ctx.send(f"Reloaded: {extension}")
+    except commands.ExtensionNotLoaded:
+        # try loading the cog if not already loaded
+        try:
+            await bot.load_extension(f"{extension}")
+            await ctx.send(f"Loaded: {extension}")
+        except Exception as e:
+            await ctx.send(f"Error: {e}")
+    except Exception as e:
+        await ctx.send(f"Error: {e}")
+        
+# syncs app commands with discord
+@bot.command(hidden=True)
+@commands.is_owner()
+async def sync(ctx, target):
+    if target == "all":
+        await bot.tree.sync()
+        print("Synced all")
+        await ctx.send("Synced all")
+
+    elif target == "test":
+        bot.tree.copy_global_to(guild=discord.Object(id=TEST_GUILD))
+        await bot.tree.sync(guild=discord.Object(id=TEST_GUILD))
+        print("Synced test")
+        await ctx.send("Synced Test")
+
+    else:
+        await ctx.send("Invalid target. Use 'all' or 'test'.")
+
+
+    
+
 
 help_text = """
 **Bot Commands:**
