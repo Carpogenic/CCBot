@@ -41,7 +41,7 @@ class pollSelect(discord.ui.Select):
             await interaction.followup.send("An error occurred while processing your vote.", ephemeral=True)
 
 # button to close the poll manually
-class ClosePollButton(discord.ui.Button):
+class closePollButton(discord.ui.Button):
     def __init__(self, author: discord.User|discord.Member, label: str, poll_view: 'pollView'):
         super().__init__(style=discord.ButtonStyle.red, label=label)
         self.poll_view = poll_view
@@ -63,7 +63,7 @@ class pollView(discord.ui.View):
         self.message = None
         self.vote_counts = [0] * len(options)
         self.user_votes = {}  # Dictionary to track each user's current vote
-        self.add_item(ClosePollButton(author, label="Close Poll", poll_view=self))
+        self.add_item(closePollButton(author, label="Close Poll", poll_view=self))
         self.select = pollSelect(options, self)
         self.add_item(self.select)
 
