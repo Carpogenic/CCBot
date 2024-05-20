@@ -1,5 +1,6 @@
 # add descriptions to commands and remove the jank .halp command
 # remove traceback from music_player as soon as i figure out what the random error is
+# generalize elsie_ellipsis_score in utils so that voiceSynth_play can actually remove credits
 
 import os
 import discord
