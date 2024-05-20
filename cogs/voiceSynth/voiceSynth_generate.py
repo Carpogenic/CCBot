@@ -57,7 +57,7 @@ async def get_audio_stream(text, language, gender):
         },
         "Swedish": {
             "Male": "EiNlNiXeDU1pqqOPrYMO",
-            "Female": "piTKgcLEGmPE4e6mEKli"
+            "Female": "E5rptoR2EGM14KAcXJV8"
         }
     }
 

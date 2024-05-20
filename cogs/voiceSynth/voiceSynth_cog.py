@@ -8,12 +8,12 @@ class AIvoice(commands.Cog):
         super().__init__()
         self.bot = bot
         self.ctx_menu = app_commands.ContextMenu(
-            name="Test",
-            callback=self.contestmenu
+            name="ElevenLabs me",
+            callback=self.voiceSynth
         )
         self.bot.tree.add_command(self.ctx_menu)
 
-    async def contestmenu(self, interaction: discord.Interaction, user: discord.User):
+    async def voiceSynth(self, interaction: discord.Interaction, user: discord.User):
         await interaction.response.send_modal(voiceSynthModal(user))
 
 
