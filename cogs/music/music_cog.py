@@ -27,7 +27,7 @@ class musicCog(commands.Cog):
         await ctx.voice_client.disconnect()
 
     @commands.command()
-    async def play(self, ctx, url=None, providedOffset=None):
+    async def play(self, ctx, url="", providedOffset=None):
 
         self.player.is_manual_stop = False
         
