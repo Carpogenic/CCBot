@@ -4,7 +4,7 @@ from .voiceSynth_play import play_audio
 
 class voiceSynthModal(discord.ui.Modal):
     def __init__(self, user: discord.User):
-        super().__init__(title="Generate voice prompt (optional)")
+        super().__init__(title="Generate voice prompt")
         self.prompt = discord.ui.TextInput(
             label="Prompt",  # Added label here
             style=discord.TextStyle.long,
@@ -28,7 +28,6 @@ class voiceSynthModal(discord.ui.Modal):
             audio_stream = await get_audio_stream(response_text, language, gender)
             if audio_stream:
                 await play_audio(interaction, audio_stream)
-            await interaction.followup.send("Voice synthesis complete and playing in the channel.", ephemeral=True)
         else:
             await interaction.followup.send("Failed to generate voice response.", ephemeral=True)
 

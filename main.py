@@ -2,6 +2,9 @@
 # remove traceback from music_player as soon as i figure out what the random error is
 # generalize elsie_ellipsis_score in utils so that voiceSynth_play can actually remove credits
 
+# voiceSynth: move check for if user is in a voice channel from _play to _cog  /- added a check to cog but _play still has some unecessary stuff
+# also add check for if user is in a different channel from bot in _cog
+
 import os
 import discord
 from discord.ext import commands
