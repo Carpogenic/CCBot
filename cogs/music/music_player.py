@@ -83,7 +83,7 @@ class MusicPlayer:
         except Exception as e:
             return f"An error occurred: {e}"
 
-    
+
     async def timecode_confirm_prompt(self, ctx: commands.Context):
         """Asks the user a question to confirm something."""
         view = Confirm()
@@ -98,17 +98,18 @@ class MusicPlayer:
         else:
             print('Timecode prompt denied...')
         return view.value
-    
+
 
 
     # for playing local sounds
+
+
     async def play_local_sound(self, interaction: discord.Interaction, file_path: str):
         # Play the local file if not already playing
-            if interaction.guild.voice_client.is_playing():
-                interaction.guild.voice_client.stop()
-            try:
-                audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
-                interaction.guild.voice_client.play(audio_source)
-            except Exception as e:
-                print(f"Play Local Sound error: {e}")
-                
+        if interaction.guild.voice_client.is_playing():
+            interaction.guild.voice_client.stop()
+        try:
+            audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=file_path)
+            interaction.guild.voice_client.play(audio_source)
+        except Exception as e:
+            print(f"Play Local Sound error: {e}")

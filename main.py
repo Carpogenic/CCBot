@@ -36,15 +36,15 @@ class MyBot(commands.Bot):
                     dot_path = relative_path.replace(os.sep, '.')
                     extension_name = f'cogs.{dot_path}.{filename[:-3]}' if dot_path != '.' else f'cogs.{filename[:-3]}'
                     print(f"\n{extension_name}")
-                    
+
                     try:
                         await self.load_extension(extension_name)
                         print(f"Loaded cog: {filename[:-7]}")
                     except Exception as e:
                         print(f"Failed to load cog {filename[:-7]}: {e}")
 
-        
-        
+
+
         return await super().setup_hook()
 
 
@@ -60,7 +60,7 @@ async def on_ready():
 
 @bot.tree.command(name="echo", description="Echoes a message.")
 @app_commands.describe(message="The message to echo.")
-async def echo (interaction: discord.Interaction, message: str) -> None:
+async def echo(interaction: discord.Interaction, message: str) -> None:
     await interaction.response.send_message(message)
     """ await interaction.followup.send("This is a followup message.")
     await interaction.followup.send("This is another followup message.") """
@@ -71,10 +71,10 @@ currentWorkingCog = None
 @commands.is_owner()
 async def reload(ctx, extension: str = None):
     global currentWorkingCog
-    
+
     extension = extension or currentWorkingCog
     currentWorkingCog = extension
-    
+
     if extension is None:
         await ctx.send("No extension specified and no previous extension to reload.")
         return
@@ -91,7 +91,7 @@ async def reload(ctx, extension: str = None):
             await ctx.send(f"Error: {e}")
     except Exception as e:
         await ctx.send(f"Error: {e}")
-        
+
 # syncs app commands with discord
 @bot.command(hidden=True)
 @commands.is_owner()
@@ -111,7 +111,7 @@ async def sync(ctx, target):
         await ctx.send("Invalid target. Use 'all' or 'test'.")
 
 
-    
+
 
 
 help_text = """

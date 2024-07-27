@@ -1,4 +1,4 @@
-#todo: move stop logic to MusicPlayer so play_local_sound doesn't disregard elapsed_time
+# todo: move stop logic to MusicPlayer so play_local_sound doesn't disregard elapsed_time
 
 import discord
 from discord.ext import commands
@@ -30,7 +30,7 @@ class musicCog(commands.Cog):
     async def play(self, ctx, url="", providedOffset=None):
 
         self.player.is_manual_stop = False
-        
+
         if not ctx.voice_client:
             await self.join(ctx)
 
@@ -46,7 +46,7 @@ class musicCog(commands.Cog):
             if providedOffset:
                 try:
                     offset = int(providedOffset)
-                except Exception as e:
+                except Exception:
 
                     await ctx.message.add_reaction(self.bot.get_emoji(1083983552540053596))
                     await ctx.send(f"Pretty sure '{providedOffset}' isn't a number, bro. -1 credit")
@@ -63,7 +63,7 @@ class musicCog(commands.Cog):
             return
         self.player.song_queue.set_current(await self.player.get_song_title(url))
         await self.player.fetch_and_play(ctx, url, offset)
-    
+
     @commands.command()
     async def stop(self, ctx):
         if ctx.voice_client and ctx.voice_client.is_playing():
@@ -120,7 +120,7 @@ class musicCog(commands.Cog):
             await self.join(ctx)
 
         await ctx.send("Select a sound:", view=LocalSoundsView(directory, self.player), delete_after=850)
-    
+
 
 
 

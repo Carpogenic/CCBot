@@ -11,4 +11,3 @@ ELSIE = os.getenv('ELSIE')
 DOOR = os.getenv('DOOR')
 THEGAME_GUILD = os.getenv('THEGAME_GUILD')
 scores_file = 'scores.json'
-
