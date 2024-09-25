@@ -13,7 +13,7 @@ class MusicPlayer:
     def __init__(self, bot) -> None:
         self.bot = bot
         self.song_queue = Queue()
-        self.last_played = {"url": None, "offset": 0}
+        self.last_played = {"url": "", "offset": 0}
         self.start_time = None
         self.accumulated_time = 0
         self.is_manual_stop = False
