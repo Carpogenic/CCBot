@@ -16,11 +16,11 @@ class ollamaCog(commands.Cog):
 
     @commands.command(aliases=["clear"])
     async def clear_chat(self, ctx):
-        await self.convo.clear()
+        await self.convo.clear(ctx)
     
     @commands.command(aliases=["ch", "talk"])
     async def respond(self, ctx, *, prompt):
-        await self.convo.ask(ctx, prompt)
+        await self.convo.user_message(ctx, prompt)
 
 async def setup(bot):
     await bot.add_cog(ollamaCog(bot))
