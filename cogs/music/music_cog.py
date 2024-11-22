@@ -23,7 +23,7 @@ class musicCog(commands.Cog):
     @commands.command()
     async def leave(self, ctx):
         self.player.clear_queue()
-        self.player.last_played = None
+        self.player.last_played = {"url": "", "offset": 0}
         await ctx.voice_client.disconnect()
 
     @commands.command()
