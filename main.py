@@ -4,6 +4,9 @@
 
 # voiceSynth: move check for if user is in a voice channel from _play to _cog  /- added a check to cog but _play still has some unecessary stuff
 # also add check for if user is in a different channel from bot in _cog
+# also if two users request at the same time, queue them instead of error
+
+# copy kyuu reminder and add check for if user is online, if not then postpone the reminder until they are
 
 import os
 import discord
