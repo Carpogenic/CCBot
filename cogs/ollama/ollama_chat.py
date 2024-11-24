@@ -13,17 +13,17 @@ class ollamaHandler:
             'role': role,
             'content': message
         }
-    
+
     async def generate_chat(self, guild_id):
         messages = self.chat_messages.setdefault(guild_id, copy.deepcopy(self.prepended_message))
 
         try:
-            ollama_response = ollama.chat(model='llama3.1:latest', stream=False, messages=messages)
+            ollama_response = ollama.chat(model='llama3.2', stream=False, messages=messages)
             assistant_message = ollama_response['message']['content']
 
             messages.append(await self.create_message(assistant_message, 'assistant'))
             return assistant_message
-        
+
         except Exception as e:
             print(f"Error in ollama_chat {e}")
             return f"Could not process request. Likely the server isn't on. \nError: {e}"
