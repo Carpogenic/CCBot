@@ -1,0 +1,6 @@
+aiohttp==3.11.10
+discord.py==2.4.0
+openai==1.57.4
+python-dotenv==1.0.1
+yt_dlp==2024.12.13
+ollama
