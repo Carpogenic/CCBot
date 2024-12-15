@@ -46,7 +46,7 @@ class ollamaHandler:
 
 
         use_vision = image is not None or await self.has_image_in_history(guild_id)
-        self.model = 'llama3.2-vision' if use_vision else 'llama3.2'
+        self.model = 'llama3.2' if use_vision else 'llama3.2' # goodbye gpu ;_;7
 
         messages = self.chat_messages.setdefault(guild_id, copy.deepcopy(self.prepended_message))
 
